@@ -1,4 +1,6 @@
 import { Html5Qrcode } from "html5-qrcode";
+import { getHuidigeUser } from "../../../../../login/model/authToestand";
+import { slaPakketOp } from "./api/pakketten.opslaan";
 
 function qs<T extends Element>(sel: string) {
   const el = document.querySelector(sel);
@@ -12,7 +14,7 @@ export function toonInscannenPagina() {
   view.innerHTML = `
     <section class="kaart">
       <h1>Inscannen</h1>
-      <p class="sub">Druk op “Scan starten” en richt op de barcode.</p>
+      <p class="sub">Scan de barcode. Vul daarna naam in en sla op.</p>
 
       <div class="scannerBox">
         <div id="scanner" class="scanner"></div>
@@ -24,10 +26,24 @@ export function toonInscannenPagina() {
       </div>
 
       <div class="resultaat">
-        <div class="label">Gescande code</div>
+        <div class="label">Gescande barcode</div>
         <div id="code" class="code">—</div>
       </div>
 
+      <form id="opslaanForm" class="formulier" style="margin-top:12px; display:none;">
+        <label class="veld">
+          <span>Voornaam</span>
+          <input id="voornaam" required placeholder="Fatima" />
+        </label>
+        <label class="veld">
+          <span>Achternaam</span>
+          <input id="achternaam" required placeholder="Munach" />
+        </label>
+
+        <button id="opslaanKnop" class="knop" type="submit">Opslaan</button>
+      </form>
+
+      <div id="melding" class="sub" style="margin-top:10px;"></div>
       <div id="fout" class="fout" aria-live="polite"></div>
     </section>
   `;
@@ -36,18 +52,27 @@ export function toonInscannenPagina() {
   const stopKnop = qs<HTMLButtonElement>("#stopScan");
   const codeEl = qs<HTMLDivElement>("#code");
   const foutEl = qs<HTMLDivElement>("#fout");
+  const meldingEl = qs<HTMLDivElement>("#melding");
+
+  const form = qs<HTMLFormElement>("#opslaanForm");
+  const voornaamEl = qs<HTMLInputElement>("#voornaam");
+  const achternaamEl = qs<HTMLInputElement>("#achternaam");
+  const opslaanKnop = qs<HTMLButtonElement>("#opslaanKnop");
 
   const scannerId = "scanner";
   const html5Qr = new Html5Qrcode(scannerId);
 
   let actief = false;
+  let laatsteBarcode = "";
 
   async function start() {
     foutEl.textContent = "";
+    meldingEl.textContent = "";
     codeEl.textContent = "—";
+    form.style.display = "none";
+    laatsteBarcode = "";
 
     try {
-      // camera kiezen (liefst back camera)
       const cams = await Html5Qrcode.getCameras();
       if (!cams || cams.length === 0) {
         foutEl.textContent = "Geen camera gevonden op dit apparaat.";
@@ -62,20 +87,17 @@ export function toonInscannenPagina() {
 
       await html5Qr.start(
         { deviceId: { exact: voorkeur.id } },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 }
-        },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
         (decodedText) => {
           // ✅ barcode gevonden
+          laatsteBarcode = decodedText;
           codeEl.textContent = decodedText;
 
-          // Optional: automatisch stoppen na 1 scan
-          stop().catch(() => {});
+          // toon form om op te slaan
+          form.style.display = "grid";
+          voornaamEl.focus();
         },
-        () => {
-          // scan errors negeren (continue scanning)
-        }
+        () => {}
       );
     } catch (e: any) {
       actief = false;
@@ -100,15 +122,51 @@ export function toonInscannenPagina() {
     }
   }
 
-  // knop events
   startKnop.addEventListener("click", () => start());
   stopKnop.addEventListener("click", () => stop());
 
-  // ✅ als je weg navigeert → scanner stoppen
-  const onNav = () => stop();
-  window.addEventListener("popstate", onNav);
+  // Opslaan naar Firestore
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    foutEl.textContent = "";
+    meldingEl.textContent = "";
 
-  // Extra safety: als pagina opnieuw wordt gerenderd, oude scanner stoppen
-  // (we verwijderen listener als we stop aanroepen via nav)
-  // Hier simpel gehouden: als je weg gaat stopt hij door popstate.
+    const user = getHuidigeUser();
+    if (!user) {
+      foutEl.textContent = "Niet ingelogd.";
+      return;
+    }
+
+    const barcode = (laatsteBarcode || "").trim();
+    if (!barcode) {
+      foutEl.textContent = "Scan eerst een barcode.";
+      return;
+    }
+
+    opslaanKnop.disabled = true;
+
+    try {
+      await slaPakketOp({
+        barcode,
+        voornaam: voornaamEl.value,
+        achternaam: achternaamEl.value,
+        aangemaaktDoorUid: user.uid,
+        aangemaaktDoorEmail: user.email ?? null
+      });
+
+      meldingEl.textContent = "✅ Opgeslagen!";
+      form.reset();
+      form.style.display = "none";
+      laatsteBarcode = "";
+      codeEl.textContent = "—";
+
+    } catch (err: any) {
+      foutEl.textContent = err?.message ?? "Opslaan mislukt.";
+    } finally {
+      opslaanKnop.disabled = false;
+    }
+  });
+
+  // als je weg navigeert → scanner stoppen
+  window.addEventListener("popstate", () => stop());
 }
