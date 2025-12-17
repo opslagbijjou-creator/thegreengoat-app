@@ -35,3 +35,51 @@ input:focus { border-color: rgba(234,240,255,.35); }
 
 .actie-rij { display:flex; justify-content: space-between; gap: 12px; align-items: center; margin-top: 14px; }
 .klein { font-size: 12px; opacity: .8; }
+.scannerBox {
+  margin-top: 12px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.22);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.scanner {
+  width: 100%;
+  min-height: 280px;
+}
+
+.rij {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.knop--sec {
+  background: rgba(255,255,255,.10);
+  color: #eaf0ff;
+  border: 1px solid rgba(255,255,255,.14);
+}
+
+.knop:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.resultaat {
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.label {
+  font-size: 12px;
+  opacity: .75;
+}
+
+.code {
+  margin-top: 6px;
+  font-weight: 800;
+  word-break: break-all;
+}

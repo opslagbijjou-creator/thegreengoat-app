@@ -1,11 +1,5 @@
-export function toonMedewerkerInscannenPagina() {
-  const view = document.querySelector<HTMLElement>("#weergave");
-  if (!view) throw new Error("Niet gevonden: #weergave");
+import { toonInscannenPagina } from "../../features/bedrijf/medewerker/paginas/inscannen/inscannen.pagina";
 
-  view.innerHTML = `
-    <section class="kaart">
-      <h1>Inscannen</h1>
-      <p class="sub">Komt zo. (Eerst alleen navigatie)</p>
-    </section>
-  `;
+export function toonMedewerkerInscannenPagina() {
+  toonInscannenPagina();
 }
