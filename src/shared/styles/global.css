@@ -83,3 +83,18 @@ input:focus { border-color: rgba(234,240,255,.35); }
   font-weight: 800;
   word-break: break-all;
 }
+.vervoerderGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.vervoerderTegel {
+  text-align: center;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.05);
+  color: #eaf0ff;
+  padding: 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 800;
+}
+.vervoerderTegel.is-actief {
+  border-color: rgba(234,240,255,.45);
+  background: rgba(255,255,255,.10);
+}

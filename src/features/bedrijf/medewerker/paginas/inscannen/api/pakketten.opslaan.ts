@@ -3,15 +3,21 @@ import { db } from "../../../../../../shared/firebase/client";
 
 export type PakketInvoer = {
   barcode: string;
+  vervoerder: string;
+
   voornaam: string;
   achternaam: string;
+
   aangemaaktDoorUid: string;
   aangemaaktDoorEmail: string | null;
 };
 
 export async function slaPakketOp(input: PakketInvoer) {
   const barcode = input.barcode.trim();
+  const vervoerder = input.vervoerder.trim();
+
   if (!barcode) throw new Error("Geen barcode.");
+  if (!vervoerder) throw new Error("Kies eerst een vervoerder.");
 
   const ref = doc(db, "pakketten", barcode);
   const bestaand = await getDoc(ref);
@@ -22,8 +28,11 @@ export async function slaPakketOp(input: PakketInvoer) {
 
   await setDoc(ref, {
     barcode,
+    vervoerder,
+
     voornaam: input.voornaam.trim(),
     achternaam: input.achternaam.trim(),
+
     status: "ingescand",
     aangemaaktOp: serverTimestamp(),
     laatstGewijzigdOp: serverTimestamp(),
