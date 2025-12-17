@@ -1,11 +1,5 @@
-export function toonMedewerkerAfhalenPagina() {
-  const view = document.querySelector<HTMLElement>("#weergave");
-  if (!view) throw new Error("Niet gevonden: #weergave");
+import { toonAfhalenPagina } from "../../features/bedrijf/medewerker/paginas/afhalen/afhalen.pagina";
 
-  view.innerHTML = `
-    <section class="kaart">
-      <h1>Afhalen</h1>
-      <p class="sub">Komt zo. (Eerst alleen navigatie)</p>
-    </section>
-  `;
+export function toonMedewerkerAfhalenPagina() {
+  toonAfhalenPagina();
 }
