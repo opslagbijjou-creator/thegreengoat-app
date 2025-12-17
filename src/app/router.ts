@@ -1,12 +1,16 @@
 import { paden } from "./paden";
 import { toonLoginPagina } from "./paginas/login.pagina";
 import { toonMedewerkerPagina } from "./paginas/medewerker.pagina";
+import { startAuthToestand, onAuthUpdate } from "../features/login/model/authToestand";
 
 function huidigePad() {
   return window.location.pathname || "/";
 }
 
 export function startRouter() {
+  // ✅ start auth observer 1x
+  startAuthToestand();
+
   const render = () => {
     const pad = huidigePad();
 
@@ -17,5 +21,9 @@ export function startRouter() {
   };
 
   window.addEventListener("popstate", render);
+
+  // ✅ als auth verandert (login/logout/refresh) → opnieuw renderen
+  onAuthUpdate(render);
+
   render();
 }

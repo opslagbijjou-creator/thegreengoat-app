@@ -1,6 +1,7 @@
 import { paden } from "../paden";
 import { loginMetEmail } from "../../features/login/api/login";
-import { loginSchermHtml } from "../../features/login/ui/loginScherm";
+import { loginSchermHtml, loginLadenHtml } from "../../features/login/ui/loginScherm";
+import { getHuidigeUser, isAuthKlaar } from "../../features/login/model/authToestand";
 
 function qs<T extends Element>(sel: string) {
   const el = document.querySelector(sel);
@@ -10,6 +11,21 @@ function qs<T extends Element>(sel: string) {
 
 export function toonLoginPagina() {
   const view = qs<HTMLElement>("#weergave");
+
+  // ✅ zolang auth nog niet klaar is: laden
+  if (!isAuthKlaar()) {
+    view.innerHTML = loginLadenHtml();
+    return;
+  }
+
+  // ✅ al ingelogd → door
+  if (getHuidigeUser()) {
+    window.history.replaceState({}, "", paden.medewerker);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+    return;
+  }
+
+  // anders: normaal login scherm
   view.innerHTML = loginSchermHtml();
 
   const form = qs<HTMLFormElement>("#loginForm");
@@ -24,8 +40,6 @@ export function toonLoginPagina() {
 
     try {
       await loginMetEmail(email, wachtwoord);
-
-      // succes → naar medewerker
       window.history.pushState({}, "", paden.medewerker);
       window.dispatchEvent(new PopStateEvent("popstate"));
     } catch {

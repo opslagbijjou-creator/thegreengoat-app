@@ -21,3 +21,12 @@ export function loginSchermHtml() {
   </section>
   `;
 }
+
+export function loginLadenHtml() {
+  return `
+  <section class="kaart">
+    <h1>Even laden…</h1>
+    <p class="sub">We controleren je sessie.</p>
+  </section>
+  `;
+}
