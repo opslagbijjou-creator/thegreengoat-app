@@ -1,5 +1,5 @@
 import { Html5Qrcode } from "html5-qrcode";
-import { getHuidigeUser } from "../../../../../login/model/authToestand";
+import { getHuidigeUser } from "../../../../login/model/authToestand";
 import { slaPakketOp } from "./api/pakketten.opslaan";
 
 function qs<T extends Element>(sel: string) {
