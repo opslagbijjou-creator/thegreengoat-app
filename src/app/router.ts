@@ -2,13 +2,15 @@ import { paden } from "./paden";
 import { toonLoginPagina } from "./paginas/login.pagina";
 import { toonMedewerkerPagina } from "./paginas/medewerker.pagina";
 import { startAuthToestand, onAuthUpdate } from "../features/login/model/authToestand";
+import { toonMedewerkerInscannenPagina } from "./paginas/medewerkerInscannen.pagina";
+import { toonMedewerkerAfhalenPagina } from "./paginas/medewerkerAfhalen.pagina";
+import { toonMedewerkerZoekenPagina } from "./paginas/medewerkerZoeken.pagina";
 
 function huidigePad() {
   return window.location.pathname || "/";
 }
 
 export function startRouter() {
-  // ✅ start auth observer 1x
   startAuthToestand();
 
   const render = () => {
@@ -16,13 +18,14 @@ export function startRouter() {
 
     if (pad === "/" || pad === paden.login) return toonLoginPagina();
     if (pad === paden.medewerker) return toonMedewerkerPagina();
+    if (pad === paden.medewerkerInscannen) return toonMedewerkerInscannenPagina();
+    if (pad === paden.medewerkerAfhalen) return toonMedewerkerAfhalenPagina();
+    if (pad === paden.medewerkerZoeken) return toonMedewerkerZoekenPagina();
 
     return toonLoginPagina();
   };
 
   window.addEventListener("popstate", render);
-
-  // ✅ als auth verandert (login/logout/refresh) → opnieuw renderen
   onAuthUpdate(render);
 
   render();
